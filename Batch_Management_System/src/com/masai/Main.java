@@ -1,393 +1,260 @@
 package com.masai;
 
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.ObjectOutputStream;
-import java.util.List;
+//import java.time.LocalDate;
 import java.util.Map;
 import java.util.Scanner;
 
-import com.masai.entities.Customer;
-import com.masai.entities.Product;
-import com.masai.entities.Transaction;
-import com.masai.exceptions.DuplicateDataException;
+import com.masai.entity.Address;
+import com.masai.entity.Batches;
+import com.masai.entity.Faculty;
+import com.masai.exceptions.DataNotFoundException;
+import com.masai.exceptions.DuplicateEntryException;
+import com.masai.exceptions.EmptyListException;
+import com.masai.exceptions.InvalidArugumentException;
 import com.masai.exceptions.InvalidDetailsException;
-import com.masai.exceptions.ProductException;
-import com.masai.exceptions.TransactionException;
-import com.masai.service.CustomerService;
-import com.masai.service.CustomerServiceImpl;
-import com.masai.service.ProductService;
-import com.masai.service.ProductServicesImpl;
-import com.masai.service.TransactionService;
-import com.masai.service.TransactionServiceImpl;
-import com.masai.utility.Admin;
-import com.masai.utility.FileExists;
-import com.masai.utility.IDGeneration;
+import com.masai.exceptions.WrongCredsException;
+import com.masai.services.BatchServiceExecut;
+import com.masai.services.BatchServices;
+import com.masai.services.FacultyServiceExcecut;
+import com.masai.services.FacultyServices;
+import com.masai.utility.AdminCred;
+import com.masai.utility.CheckFileAv;
+//import com.masai.utility.GenerateFacID;
 
 public class Main {
 
-	// admin functionality
-	private static void adminFunctionality(Scanner sc, Map<Integer, Product> products, Map<String, Customer> customers,
-			List<Transaction> transactions) throws InvalidDetailsException, ProductException, TransactionException {
-		// admin login
-
-		adminLogin(sc);
-
-		ProductService prodService = new ProductServicesImpl();
-		CustomerService cusService = new CustomerServiceImpl();
-		TransactionService trnsactionService = new TransactionServiceImpl();
-		int choice = 0;
-		try {
-			do {
-				System.out.println("Press 1 add the product");
-				System.out.println("Press 2 view all the product");
-				System.out.println("Press 3 delete the product");
-				System.out.println("Press 4 update the product");
-				System.out.println("Press 5 view all customers");
-				System.out.println("Press 6 to view all transactions");
-				System.out.println("Press 7 to log out");
-				choice = sc.nextInt();
-
-				switch (choice) {
-				case 1:
-					String added = adminAddProduct(sc, products, prodService);
-					System.out.println(added);
+	//Admin Activity
+	
+	public static void adminActivity(Scanner sc,Map<String , Batches> batches , Map<String , Faculty> faculty) throws InvalidDetailsException, EmptyListException, InvalidArugumentException , DuplicateEntryException, DataNotFoundException {
+//		System.out.println(batches);
+		adminLoginMethod(sc);
+		FacultyServices fac = new FacultyServiceExcecut();
+		BatchServices batchS = new BatchServiceExecut();
+		int opt = 0;
+		
+		do {
+				System.out.println( "Press '1' -_-_-> to view all faculty"
+		                            +"\n"+
+						            "Press '2' -_-_-> to create new Course"
+						            +"\n"+
+						            "Press '3' -_-_-> to view all Course"
+						            +"\n"+
+						            "Press '4' -_-_-> to delete a Course"
+						            +"\n"+
+						            "Press '5' -_-_-> to view a particular Course"
+						            +"\n"+
+						            "Press '6' -_-_-> to Update a particular Course"
+						            +"\n"+
+						            "Press '7' -_-_-> to Assign a faculty to a Course"
+						            +"\n"+
+						            "Press '0' -_-_-> to Exit From Admin...");
+				
+				opt = sc.nextInt();
+				switch(opt) {
+				case 1 : 
+					adminViewAllFaculties(faculty , fac);
 					break;
-				case 2:
-
-					adminViewAllProducts(products, prodService);
+				case 2 :
+					adminCreateNewBatch(sc , batches , batchS);
+					
 					break;
-				case 3:
-
-					adminDeleteProduct(sc, products, prodService);
+				case 3 : 
+					adminViewAllBatches(batches , batchS);
 					break;
-				case 4:
-
-					String upt = adminUpdateProduct(sc, products, prodService);
-					System.out.println(upt);
+				case 4 : 
+					deleteABatch(sc , batches , batchS);
 					break;
-				case 5:
-					adminViewAllCustomers(customers, cusService);
-
+				case 5 : 
+					viewAPartBatch(sc , batches , batchS);
+					break;	
+				case 6 : 
+					updateAPartBatch(sc , batches , batchS);
+					break;	
+				case 7 : 
+					assignFaculty(sc ,faculty, batches , batchS);
+					break;		
+				case 0 :
+					System.out.println("Successfully Existed from Admin...");
 					break;
-				case 6:
-					adminViewAllTransactions(transactions, trnsactionService);
-					break;
-				case 7:
-					System.out.println("admin has successfully logout");
-					break;
-				default:
-					throw new IllegalArgumentException("Unexpected value: " + choice);
+				default : 
+					throw new InvalidArugumentException("Please Select a Valid one");
 				}
-
-			} while (choice <= 6);
-		} catch (Exception e) {
-			System.out.println(e.getMessage());
-		}
+				
+		}while(opt!=0);
+		
 	}
-
-	public static void adminLogin(Scanner sc) throws InvalidDetailsException {
-
-		System.out.println("Enter the user name");
+	
+	public static void adminViewAllFaculties(Map<String , Faculty> faculty , FacultyServices fac) throws EmptyListException {
+		fac.adminViewAllFac(faculty);
+	}
+	public static void adminLoginMethod(Scanner sc ) throws InvalidDetailsException  {
+		System.out.println("Enter Your UserName");
 		String userName = sc.next();
-		System.out.println("Enter the password");
-		String password = sc.next();
-		if (userName.equals(Admin.username) && password.equals(Admin.password)) {
-
-			System.out.println("successfully login");
+		System.out.println("Enter Your PassWord");
+		String pass = sc.next(); 
+		
+		if(userName.equals(AdminCred.users) && pass.equals(AdminCred.passD)) { 
+			System.out.println("Admin SuccessFully Logged In.");
 		} else {
-			throw new InvalidDetailsException("Invalid Admin Credentials");
+			throw new InvalidDetailsException("Entered Credentials are not in place, Try Again...");
+		  }
 		}
+	
+	public static void adminCreateNewBatch(Scanner sc , Map<String , Batches> batches , BatchServices batchS) throws DuplicateEntryException {
+	
+		System.out.println("Enter Following Cred to Create a New Course");
+		System.out.println("Enter a Unique ID :-");
+		String id = sc.next();
+		System.out.println("Enter Course Name :-");
+		String courseName = sc.next();
+		System.out.println("Enter Number of Seats for Course :- "+courseName);
+		int noOfSeats = sc.nextInt();
+		System.out.println("Enter a Start Date for Course :- "+courseName);
+		String localDate = sc.next();
+		System.out.println("Enter Duration for Course :- "+courseName);
+		int duration = sc.nextInt();
+		Batches newBatch = new Batches(id , courseName, noOfSeats, localDate , duration);
+		
+		System.out.println( batchS.createNewBatch( batches,newBatch));
+		
 	}
-
-	public static String adminAddProduct(Scanner sc, Map<Integer, Product> products, ProductService prodService) {
-
-		String str = null;
-		System.out.println("please enter the product details");
-		System.out.println("Enter the product name");
-		String name = sc.next();
-		System.out.println("Enter the product qty");
-		int qty = sc.nextInt();
-		System.out.println("Enter the product price/piece");
-		double price = sc.nextDouble();
-		System.out.println("Enter the product category");
-		String cate = sc.next();
-
-		Product prod = new Product(IDGeneration.generateId(), name, qty, price, cate);
-
-		str = prodService.addProduct(prod, products);// considering all details are valid
-
-		return str;
-
+	public static void adminViewAllBatches(Map<String , Batches> batches ,BatchServices batchS) throws EmptyListException {
+		
+		batchS.adViewAllBatches(batches);
+		
 	}
-
-	public static void adminViewAllProducts(Map<Integer, Product> products, ProductService prodService)
-			throws ProductException {
-		prodService.viewAllProducts(products);
+	public static void deleteABatch(Scanner sc , Map<String , Batches> batches ,BatchServices batchS) throws EmptyListException, DataNotFoundException {
+		System.out.println("Enter Id of the batch you want to delete");
+		String id = sc.next();
+		   batchS.deleteaBatch(id, batches);
+		System.out.println("SuccessFully Deleted "+id+" batch from the System...");
 	}
-
-	public static void adminDeleteProduct(Scanner sc, Map<Integer, Product> products, ProductService prodService)
-			throws ProductException {
-
-		System.out.println("please enter the id of product to be deleted");
-		int id = sc.nextInt();
-		prodService.deleteProduct(id, products);
+	
+	public static void viewAPartBatch(Scanner sc  , Map<String , Batches> batches ,BatchServices batchS) throws DataNotFoundException, EmptyListException {
+		System.out.println("Enter Id of the batch you want to See");
+		String id = sc.next();
+	Batches batch =	batchS.viewABatchById(id, batches);
+	System.out.println(batch);
 	}
-
-	public static String adminUpdateProduct(Scanner sc, Map<Integer, Product> products, ProductService prodService)
-			throws ProductException {
-		String result = null;
-		System.out.println("please enter the id of the product which is to be updated");
-		int id = sc.nextInt();
-		System.out.println("Enter the updated details ");
-
-		System.out.println("Enter the product name");
-		String name = sc.next();
-
-		System.out.println("Enter the  product qty");
-		int qty = sc.nextInt();
-
-		System.out.println("Enter the product price/piece");
-		double price = sc.nextDouble();
-
-		System.out.println("Enter the product category");
-		String cate = sc.next();
-
-		Product update = new Product(id, name, qty, price, cate);
-
-		result = prodService.updateProduct(id, update, products);
-		return result;
+	
+	public static void updateAPartBatch(Scanner sc  , Map<String , Batches> batches ,BatchServices batchS)throws DataNotFoundException {
+		System.out.println("Enter Id of the batch you want to Update");
+		String id = sc.next();
+		batchS.updateABatch(sc, id, batches);
 	}
-
-	public static void adminViewAllCustomers(Map<String, Customer> customers, CustomerService cusService)
-			throws ProductException {
-		List<Customer> list = cusService.viewAllCustomers(customers);
-
-		for (Customer c : list) {
-			System.out.println(c);
-		}
+	
+	public static void assignFaculty(Scanner sc ,Map<String , Faculty> faculty,  Map<String , Batches> batches ,BatchServices batchS )throws DataNotFoundException {
+		batchS.assignAFacultyToBactch(sc, batches ,faculty);
 	}
-
-	public static void adminViewAllTransactions(List<Transaction> transactions, TransactionService trnsactionService)
-			throws TransactionException {
-		List<Transaction> allTransactions = trnsactionService.viewAllTransactions(transactions);
-
-		for (Transaction tr : allTransactions) {
-			System.out.println(tr);
-		}
-
-	}
-
-	// customer functionality
-	public static void customerFunctionality(Scanner sc, Map<String, Customer> customers,
-			Map<Integer, Product> products, List<Transaction> transactions)
-			throws InvalidDetailsException, TransactionException {
-
-		CustomerService cusService = new CustomerServiceImpl();
-		ProductService prodService = new ProductServicesImpl();
-		TransactionService trnsactionService = new TransactionServiceImpl();
-
-		// Customer login
-		System.out.println("please enter the following details to login");
-		System.out.println("please enter the email");
-		String email = sc.next();
-		System.out.println("Enter the password");
-		String pass = sc.next();
-		customerLogin(email,pass, customers, cusService);
-
-		try {
-			int choice = 0;
-			do {
-				System.out.println("Select the option of your choice");
-				System.out.println("Press 1 to view all products");
-				System.out.println("Press 2 to buy a product");
-				System.out.println("Press 3 to add money to a wallet");
-				System.out.println("Press 4 view wallet balance");
-				System.out.println("Press 5 view my details");
-				System.out.println("Press 6 view my transactions");
-				System.out.println("Press 7 to logout");
-				choice = sc.nextInt();
-
-				switch (choice) {
-				case 1:
-					customerViewAllProducts(products, prodService);
-					break;
-				case 2:
-					String result = customerBuyProduct(sc, email, products, customers, transactions, cusService);
-					System.out.println(result);
-					break;
-				case 3:
-					String moneyAdded = customerAddMoneyToWallet(sc, email, customers, cusService);
-					System.out.println(moneyAdded);
-					break;
-				case 4:
-					double walletBalance = customerViewWalletBalance(email, customers, cusService);
-					System.out.println("Wallet balance is: " + walletBalance);
-					break;
-				case 5:
-					customerViewMyDetails(email, customers, cusService);
-					break;
-				case 6:
-					customerViewCustomerTransactions(email, transactions, trnsactionService);
-					break;
-				case 7:
-					System.out.println("you have successsfully logout");
-					break;
-				default:
-					System.out.println("invalid choice");
-					break;
-				}
-
-			} while (choice <= 6);
-		} catch (Exception e) {
-			System.out.println(e.getMessage());
-		}
-	}
-
-	public static void customerSignup(Scanner sc, Map<String, Customer> customers) throws DuplicateDataException {
-		System.out.println("please enter the following details to Signup");
-		System.out.println("please enter the user name");
-		String name = sc.next();
-		System.out.println("Enter the password");
-		String pass = sc.next();
-		System.out.println("enter the address");
-		String address = sc.next();
-		System.out.println("Enter the email id");
-		String email = sc.next();
-		System.out.println("Enter the balance to be added into the wallet");
-		double balance = sc.nextDouble();
-		Customer cus = new Customer(balance, name, pass, address, email);
-
-		CustomerService cusService = new CustomerServiceImpl();
-		cusService.signUp(cus, customers);
-		System.out.println("customer has Succefully sign up");
-
-	}
-
-	public static void customerLogin(String email,String pass, Map<String, Customer> customers, CustomerService cusService)
-			throws InvalidDetailsException {
-		cusService.login(email, pass,customers);
-		System.out.println("Customer has successfully login");
-
-	}
-
-	public static void customerViewAllProducts(Map<Integer, Product> products, ProductService prodService)
-			throws ProductException {
-		prodService.viewAllProducts(products);
-	}
-
-	public static String customerBuyProduct(Scanner sc, String email, Map<Integer, Product> products,
-			Map<String, Customer> customers, List<Transaction> transactions, CustomerService cusService)
-			throws InvalidDetailsException, ProductException {
-		System.out.println("Enter the product id");
-		int id = sc.nextInt();
-		System.out.println("enter the quantity you want to buy");
-		int qty = sc.nextInt();
-		cusService.buyProduct(id, qty, email, products, customers, transactions);
-
-		return "You have successfully bought the product";
-
-	}
-
-	public static String customerAddMoneyToWallet(Scanner sc, String email, Map<String, Customer> customers,
-			CustomerService cusService) {
-		System.out.println("please enter the amount");
-		double money = sc.nextDouble();
-		boolean added = cusService.addMoneyToWallet(money, email, customers);
-
-		return "Amount: " + money + " successfully added to your wallet";
-	}
-
-	public static double customerViewWalletBalance(String email, Map<String, Customer> customers,
-			CustomerService cusService) {
-		double walletBalance = cusService.viewWalletBalance(email, customers);
-		return walletBalance;
-	}
-
-	public static void customerViewMyDetails(String email, Map<String, Customer> customers,
-			CustomerService cusService) {
-		Customer cus = cusService.viewCustomerDetails(email, customers);
-		System.out.println("name : " + cus.getUsername());
-		System.out.println("address : " + cus.getAddress());
-		System.out.println("email : " + cus.getEmail());
-		System.out.println("wallet balance : " + cus.getWalletBalance());
-	}
-
-	public static void customerViewCustomerTransactions(String email, List<Transaction> transactions,
-			TransactionService trnsactionService) throws TransactionException {
-		List<Transaction> myTransactions = trnsactionService.viewCustomerTransactions(email, transactions);
-
-		for (Transaction tr : myTransactions) {
-			System.out.println(tr);
-		}
-	}
-
 	
 	
-	public static void main(String[] args) {
-//file check
-		Map<Integer, Product> products = FileExists.productFile();
-		Map<String, Customer> customers = FileExists.customerFile();
-		List<Transaction> transactions = FileExists.transactionFile();
-//		System.out.println(products.size());
-//		System.out.println(customers.size());
-//		System.out.println(transactions.size());
-
+	
+	
+	
+	public static void facultyActivity(Scanner sc  , Map<String , Faculty> faculty , Map<String , Batches> batches) throws WrongCredsException {
+		// TODO Auto-generated method stub
+		FacultyServices  facService = new FacultyServiceExcecut();
+		System.out.println("Enter Following Details to LogIn to System...");
+		System.out.println("Enter Your ID");
+		String id = sc.next();
+		System.out.println("Enter Your UserName");
+		String name = sc.next();
+		System.out.println("Enter Your Email");
+		String email = sc.next();
+		System.out.println("Enter Your Password");
+		String pass = sc.next();
+		facultyLogin(id , name , email, pass ,faculty ,facService);
+	    System.out.println(" Faculty "+ name+" SuccessFully Logged In...");	
+		
+	}
+	
+	public static void facultyLogin(String id , String name , String email , String pass  , Map<String , Faculty> faculty , FacultyServices facService) throws WrongCredsException {
+		facService.login(id,name, email , pass , faculty);
+	}
+	
+	public static void facultySignup(Scanner sc , Map<String , Faculty> faculty ) throws DuplicateEntryException, FileNotFoundException, IOException {
+		
+		System.out.println("Enter Following details");
+		System.out.println("Enter Your First Name (last name don't bother)");
+		String userName = sc.next();
+		System.out.println("Create a password");
+		String password = sc.next();
+		System.out.println("Enter Your City");
+		String city = sc.next();
+		System.out.println("Enter Your State");
+		String state = sc.next();
+		System.out.println("Enter Your ZipCode");
+		String zip = sc.next();
+		System.out.println("Enter a Landmark");
+		String landmark = sc.next();
+		Address address = new Address(city, state ,zip , landmark);
+		System.out.println("Enter Your Email");
+		String email = sc.next();
+		Faculty fac = new Faculty(userName,password,address,email );
+		
+		FacultyServices facSer = new FacultyServiceExcecut();
+		
+		facSer.signUp(fac,faculty);
+		
+	}
+	public static void main(String[] args) throws ClassNotFoundException, IOException {
+		// TODO Auto-generated method stub
+		
+		Map<String , Batches> batches = CheckFileAv.batchFile();
+		Map<String , Faculty> faculty = CheckFileAv.facultyFile();
+//		System.out.println(batches);
 		Scanner sc = new Scanner(System.in);
-
-		System.out.println("Welcome , in Product Management System");
-
+		
+		System.out.println("Welcome to sagar Batch Management System");
+		
 		try {
-
-			int preference = 0;
+			int pref = 0;
 			do {
-				System.out.println("Please enter your preference, " + " '1' --> Admin login , '2' --> Customer login , "
-				+ "'3' for Customer signup, '0' for exit");
-				preference = sc.nextInt();
-				switch (preference) {
-				case 1:
-					adminFunctionality(sc, products, customers, transactions);
-					break;
-				case 2:
-					customerFunctionality(sc, customers, products, transactions);
-					break;
-
-				case 3:
-					customerSignup(sc, customers);
-					break;
-
-				case 0:
-					System.out.println("successfully existed from the system");
-
-					break;
-
-				default:
-					throw new IllegalArgumentException("Invalid Selection");
+				System.out.println("Enter Your Preferences, What do you want ,"
+			                        +"\n" + 
+						            "Press '1' -_-_-> For Admin Login"
+			                        +"\n" + 
+						            "Press '2' -_-_-> For Faculty Login ,"
+			                        +"\n" + 
+						            "Press '3' -_-_-> For Faculty SignUp ," 
+			                        +"\n" + 
+						            "Press '0' -_-_-> For Existing the System. " + "\n");
+				
+				pref = sc.nextInt();
+				
+				switch(pref) {
+				case 1 : adminActivity(sc,batches,faculty);
+				break;
+				case 2 : facultyActivity(sc , faculty , batches);
+				break;
+				case 3 : facultySignup(sc , faculty);
+				break;
+				case 0 : System.out.println("Successfully Existed from the System");
+				break;
+				default : throw new InvalidArugumentException("Please Select a Valid one");
+				
 				}
-
 			}
-
-			while (preference != 0);
-
-		} catch (Exception e) {
-
+			while(pref!=0);
+			
+		} catch(Exception e) {
 			System.out.println(e.getMessage());
-		} finally {
-			// serialization (finally always executed)
-			try {
-				ObjectOutputStream poos = new ObjectOutputStream(new FileOutputStream("Product.ser"));
-				poos.writeObject(products);
-				ObjectOutputStream coos = new ObjectOutputStream(new FileOutputStream("Customer.ser"));
-				coos.writeObject(customers);
-
-				ObjectOutputStream toos = new ObjectOutputStream(new FileOutputStream("Transactions.ser"));
-				toos.writeObject(transactions);
-			//	System.out.println("serialized..........");
-			} catch (Exception e) {
-																				// TODO: handle exception
+		}
+		finally {
+		  try {
+				ObjectOutputStream batchSt = new ObjectOutputStream(new FileOutputStream("BatchFile.ser"));
+				batchSt.writeObject(batches);
+				ObjectOutputStream facultySt = new ObjectOutputStream(new FileOutputStream("Faculty.ser"));
+				facultySt.writeObject(faculty);
+				batchSt.close();
+				facultySt.close();
+			}catch(Exception e) {
 				System.out.println(e.getMessage());
 			}
 		}
-
 	}
-
 }
