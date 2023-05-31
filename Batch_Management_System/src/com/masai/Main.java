@@ -209,7 +209,7 @@ public class Main {
 //		System.out.println(batches);
 		Scanner sc = new Scanner(System.in);
 		
-		System.out.println("Welcome to sagar Batch Management System");
+		System.out.println("Welcome to Alpha Batch Management System");
 		
 		try {
 			int pref = 0;
